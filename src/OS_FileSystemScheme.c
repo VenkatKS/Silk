@@ -19,8 +19,8 @@ struct nRTOS_SuperBlock FileSystemProperties;
 char SDCARD_SPOOF[] = "myfilesystem.store";
 
 // Forward declarations
-bool 		_WriteToFile(BYTE* InputBuffer, uint64_t BlockNum);				// Write provided buffer to sector number
-bool 		_ReadFromFile(BYTE* OutputBuffer, uint64_t BlockNum);				// Read sector number to provided buffer
+bool 		_WriteToFile(BYTE* InputBuffer, uint64_t BlockNum);						// Write provided buffer to sector number
+bool 		_ReadFromFile(BYTE* OutputBuffer, uint64_t BlockNum);					// Read sector number to provided buffer
 // Update provided BitMap struct with sector data from sector number
 bool 		_TranscribeBitMap(BYTE* blockToUse, BitMap* mapToUpdate, uint32_t NumBytes);
 
@@ -30,32 +30,28 @@ bool 		_CheckInodeOccupancy(uint32_t Inodenum);								// Check and see if the p
 void 		_MarkInodeAsOccupied(uint32_t InodeNum);								// Mark the volatile inode as occupied
 void 		_MarkInodeAsFree(uint32_t InodeNum);									// Mark the volatile inode as free
 void 		_UpdateNonVolatileInodeCopy(uint32_t InodeNum, INODE* volatileCopy);	// Write the provided inode to the non-volatile memory
-int32_t 		_GetNextOccupiedInode(uint32_t StartLocation);						// Get the next occupied node from the provided node to get (-1 if none)
+int32_t 	_GetNextOccupiedInode(uint32_t StartLocation);							// Get the next occupied node from the provided node to get (-1 if none)
 void 		_ReadInodeFromNonVolatileMemory(uint32_t InodeNum, INODE* location);	// Update provided memory address by reading data from non-volatile memory for particular inode
-int32_t 		_GetInodeFromFileName(char* fileName);								// Returns the inode number of the inode that is associated with this filename (-1 if none).
+int32_t 	_GetInodeFromFileName(char* fileName);									// Returns the inode number of the inode that is associated with this filename (-1 if none).
 
 // Block private declarations
-uint32_t 	_GetNextFreeBlock();							// Returns the next avaliable block number (Starts at 0, iterates to the end). --> Panics!
-void 		_MarkBlockAsOccupied(uint32_t BlockNum);		// Marks and returns the provided block as being occupied in the volatile bitmap
+uint32_t 	_GetNextFreeBlock();													// Returns the next avaliable block number (Starts at 0, iterates to the end). --> Panics!
+void 		_MarkBlockAsOccupied(uint32_t BlockNum);								// Marks and returns the provided block as being occupied in the volatile bitmap
 void 		_MarkBlockAsFree(uint32_t BlockNum);
 void 		_UpdateNonVolatileDataBlockCopy(uint32_t BlockNum, BYTE* volatileCopy); // Update the copy of the block in disk
 
 // BitMap private declarations
-void 		_FlushBitMapToDisk();						// Writes the volatile copy of the bitmaps to non-volatile storage
+void 		_FlushBitMapToDisk();													// Writes the volatile copy of the bitmaps to non-volatile storage
 
 // Used for temporary item movement
-INODE	    CurrentNode;									// Use this to interact with the inode storage
-BYTE 		tempBlock[SECTOR_SIZE];						// Use this to interact with any storage sector
+INODE	    CurrentNode;															// Use this to interact with the inode storage
+BYTE 		tempBlock[SECTOR_SIZE];													// Use this to interact with any storage sector
 
 //***************************************** Public Functions ************************************//
 
 // Precondition: Atomic (since called from OS_Init, no threads should have been launched yet).
 void OSFS_Init()
 {
-
-	DiskInitialized = TRUE;
-
-	// Read the file system metadata into memory
 
 	// Read the superblock into memory
 	memset(&tempBlock, 0, SECTOR_SIZE);
@@ -65,8 +61,11 @@ void OSFS_Init()
 	}
 	else
 	{
+		printf("File does not exist\n");
 		exit(-1);
 	}
+
+	DiskInitialized = TRUE;
 
 	// Transcribe the bitmaps into memory
 	DataBitMap = BitMap_Init(DATA_BITMAP_SIZE_IN_WORDS);
@@ -123,7 +122,7 @@ bool OSFS_Format()
 	// Store the data bit map into the proper area
 	BitMap_SetBit(DataBitMap, SUPER_BLOCK_SECTOR_NUM); 				// The superblock location is taken.
 	BitMap_SetBit(DataBitMap, INODE_BITMAP_SECTOR_NUM);				// The inode bitmap block is taken.
-	BitMap_SetBit(DataBitMap, DATA_BITMAP_SECTOR_NUM);					// The data bitmap block is taken.
+	BitMap_SetBit(DataBitMap, DATA_BITMAP_SECTOR_NUM);				// The data bitmap block is taken.
 	BitMap_SetBit(DataBitMap, MAX_INODE_COUNT);						// Debugging instrument
 
 	int inodeSectors = 0;
@@ -132,7 +131,7 @@ bool OSFS_Format()
 		BitMap_SetBit(DataBitMap, INODE_BLOCK_START_NUM + inodeSectors);		// Mark all the inode sectors as occupied.
 	}
 
-	// Since the bitmap has a dynamic array, we need to transcribe it manually
+	//Since the bitmap has a dynamic array, we need to transcribe it manually
 	//CurrentBlock.SizeInBytes = sizeof(BitMap) + (DATA_BITMAP_SIZE_IN_WORDS * sizeof(uint32_t)) - sizeof(uint32_t*); // everything but the pointer
 	memset(&tempBlock, 0, SECTOR_SIZE);
 	memcpy(&tempBlock[0], DataBitMap, sizeof(BitMap) - sizeof(uint32_t*)); // Store everything but the pointer.
@@ -568,7 +567,9 @@ bool _ReadFromFile(BYTE* OutputBuffer, uint64_t BlockNum)
 {
     FILE* fileptr = fopen(SDCARD_SPOOF, "rb");
     if (!fileptr) {
-        return FALSE;
+    	OSFS_Format();
+    	fileptr = fopen(SDCARD_SPOOF, "rb");
+    	if (!fileptr) return FALSE;
     }
     fseek(fileptr, 0, SEEK_END);
     long filelen = ftell(fileptr);

@@ -28,23 +28,25 @@ void Shell_FormatFS(int one);
 void Shell_LS(int one);
 
 char*			commandDef[]			=		{
-												"help: 				Output command information.\n",
-												"creat:			    Creates a new file and allows writes to it.\n",
-												"del:				Deletes a file\n",
-												"append:				Appends attached string to the end of the file\n",
-												"printfile:			Prints content of file\n",
-												"ls:					List all the files on the SD card.\n",
-												"format:				Formats the entire filesystem.\n"
-											};
+												"help:\n Output command information.\n\n",
+												"creat:\n Creates a new file and allows writes to it.\n\n",
+												"del:\n Deletes a file\n\n",
+												"app:\n Appends attached string to the end of the file\n\n",
+												"printfile:\n Prints content of file\n\n",
+												"ls:\n List all the files on the SD card.\n\n",
+												"format:\n Formats the entire filesystem.\n\n"
+												};
+
 char* 			commandFormat[]		= 		{
-												"help",
-												"creat <filename>",
-												"del <filename>",
-												"app <filename> <string>",
-												"printfile <filename>",
-												"format",
-												"ls"
+												"help\n",
+												"creat <filename>\n",
+												"del <filename>\n",
+												"app <filename> <string>\n",
+												"printfile <filename>\n",
+												"format\n",
+												"ls\n"
 											};
+
 char* 			commands[] 			= 		{
 												"help",
 												"creat",
@@ -128,7 +130,7 @@ void Interpreter()
 		  OutCRLF();
 		  //EndCritical(PreviousState);
 
-		  printf("Please enter command:");
+		  printf("Please enter command: \n");
 	  }
 
 }
@@ -208,14 +210,14 @@ void Help_Output(int one)
 	int i = 0;
 	OutCRLF();
 	OutCRLF();
-	printf("Command Information:");
+	printf("Command Information:\n");
 	OutCRLF();
 	for (i = 0; i < COMMAND_COUNT; i++)
 	{
 		printf("%s", commandDef[i]);
 	}
-
-	printf("Command Formats:");
+	printf("\n\n");
+	printf("Command Formats: \n");
 	OutCRLF();
 	for (i = 0; i < COMMAND_COUNT; i++)
 	{
