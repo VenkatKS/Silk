@@ -2,7 +2,7 @@
 
 Silk is a self-contained application that spoofs a shell interpreter and implements my own filesystem scheme for file storage. It's a fun project I worked on to learn more about how filesystems are managed within the operating system. The heart of the application is the filesystem scheme implemented within *src/OS_FileSystemScheme.c/h*.
 
-The entire project, along with the filesystem design, was designed and written from scratch. My filesystem scheme is based off the EXT2 filesystem. 
+The entire project, along with the filesystem design, was designed and written from scratch. My filesystem scheme is based off the EXT2 filesystem. This project was originally designed for my N108 OS, before I switched to using FAT32.
 
 ## Silk Specifics
 As explained above, the program spoofs a shell interpreter and implements a back-end filesystem. When run for the first time, Silk creates a file in the host OS's filesystem named *myfilesystem.store.* My entire filesystem -- and any files created within my filesystem -- is stored within this file.
